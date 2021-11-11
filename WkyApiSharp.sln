@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WkyApiSharp", "WkyApiSharp\WkyApiSharp.csproj", "{65FE501E-BA79-4D6F-A2FD-85DE093C3F27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WkyApiSharp.Test", "WkyApiSharp.Test\WkyApiSharp.Test.csproj", "{3B727DE2-8307-4D56-8159-ACFF7C3E2ACE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{65FE501E-BA79-4D6F-A2FD-85DE093C3F27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65FE501E-BA79-4D6F-A2FD-85DE093C3F27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65FE501E-BA79-4D6F-A2FD-85DE093C3F27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65FE501E-BA79-4D6F-A2FD-85DE093C3F27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B727DE2-8307-4D56-8159-ACFF7C3E2ACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B727DE2-8307-4D56-8159-ACFF7C3E2ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B727DE2-8307-4D56-8159-ACFF7C3E2ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B727DE2-8307-4D56-8159-ACFF7C3E2ACE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3C155005-B3A3-47A0-9765-1C53E7C58447}
+	EndGlobalSection
+EndGlobal

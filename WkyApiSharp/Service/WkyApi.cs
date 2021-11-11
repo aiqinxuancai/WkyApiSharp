@@ -188,7 +188,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiListPeerResultModel model = WkyApiListPeerResultModel.FromJson(resultJson);
                 return model;
             }
@@ -216,7 +216,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiGetUsbInfoResultModel model = WkyApiGetUsbInfoResultModel.FromJson(resultJson);
                 return model;
             }
@@ -244,7 +244,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiGetTurnServerResultModel model = WkyApiGetTurnServerResultModel.FromJson(resultJson);
                 return model;
             }

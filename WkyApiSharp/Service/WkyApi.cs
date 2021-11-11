@@ -170,7 +170,7 @@ namespace WkyApiSharp.Service
         /// 获取玩客云设备列表
         /// </summary>
         /// <returns></returns>
-        public async Task<WkyApiListPeerResultModel> ListPeer()
+        public async Task<WkyApiListPeerResultModel> ListPeer() 
         {
             ///listPeer?appversion=1.4.5.112&ct=5&v=8&sign=b806ff46fde38c3da6b0be10e86ebd4c
             string data = GetParams(new Dictionary<string, string>()
@@ -180,6 +180,8 @@ namespace WkyApiSharp.Service
                 { "v" , "2"},
                 { "ct" , "9"},
             }, UserInfo.SessionId);
+
+            //&ct=5&v=8(PC)
             Debug.WriteLine(data);
             var result = await BaseHeaderAndCookie(kListPeerURL + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);

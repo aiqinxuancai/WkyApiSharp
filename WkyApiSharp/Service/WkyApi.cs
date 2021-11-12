@@ -239,7 +239,7 @@ namespace WkyApiSharp.Service
                 {"sn", sn}
             }, UserInfo.SessionId);
             Debug.WriteLine(data);
-            var result = await BaseHeaderAndCookie(kPeerUSBInfoUrl + data).GetAsync();
+            var result = await BaseHeaderAndCookie(kGetTurnServer + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
             {

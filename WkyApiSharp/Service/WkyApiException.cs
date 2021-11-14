@@ -4,7 +4,10 @@ using System.Text;
 
 namespace WkyApiSharp.Service
 {
-    class WkyApiException : Exception
+    public class WkyApiException : Exception
     {
+        public WkyApiException(string message) : base(message)
+        {
+        }
     }
 }

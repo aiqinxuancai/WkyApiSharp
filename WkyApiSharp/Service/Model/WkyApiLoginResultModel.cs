@@ -44,6 +44,10 @@ namespace WkyApiSharp.Service.Model
         public string PhoneArea { set; get; } //86
 
 
+
+        public string sMsg { set; get; } //86
+        
+
         public DateTime CreateDateTime { set; get; } 
     }
 }

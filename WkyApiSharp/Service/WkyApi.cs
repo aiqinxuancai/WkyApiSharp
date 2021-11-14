@@ -101,7 +101,7 @@ namespace WkyApiSharp.Service
         /// 登录玩客云
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> Login(out string errorMessage)
+        public async Task<bool> Login()
         {
             Dictionary<string, string> loginData;
 
@@ -143,7 +143,7 @@ namespace WkyApiSharp.Service
 
             //("Set-Cookie", "userid=**; Expires=Fri, 05-Nov-21 06:46:52 GMT; Max-Age=604800; Domain=.onethingpcs.com; Path=/")
             Debug.WriteLine(JsonConvert.SerializeObject(loginData));
-            errorMessage = "";
+
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
@@ -152,7 +152,6 @@ namespace WkyApiSharp.Service
                 Console.WriteLine(resultJson);
                 if (resultRoot.ContainsKey("sMsg") && resultRoot["sMsg"].ToString() == "Success")
                 {
-                    //成功
                     UserInfo = resultRoot["data"].ToObject<WkyApiLoginResultModel>();
                     UserInfo.CreateDateTime = DateTime.Now;
                     return true;
@@ -161,9 +160,8 @@ namespace WkyApiSharp.Service
                 {
                     if (resultRoot.ContainsKey("sMsg"))
                     {
-                        errorMessage = resultRoot["sMsg"].ToString();
+                        throw new WkyApiException(resultRoot["sMsg"].ToString());
                     }
-                    
                 }
             }
 

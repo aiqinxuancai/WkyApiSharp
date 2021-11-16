@@ -379,6 +379,32 @@ namespace WkyApiSharp.Service
             return null;
         }
 
+        public async Task<WkyApiBtCheckResultModel> BtCheck(string peerId, byte[] fileData)
+        {
+            var data = new Dictionary<string, string>()
+            {
+                { "pid", peerId },
+                { "v", "2"},
+                { "ct", "31"},
+            };
+            Debug.WriteLine(data);
+
+            System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
+
+            var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}").PostMultipartAsync(mp => mp.Add("filepath", httpContent));
+
+
+            JsonConvert.SerializeObject(result.Cookies);
+            if (result.StatusCode == 200)
+            {
+                string resultJson = await result.GetStringAsync();
+                Console.WriteLine(resultJson);
+                WkyApiBtCheckResultModel model = WkyApiBtCheckResultModel.FromJson(resultJson);
+                return model;
+            }
+            return null;
+        }
+
         /// <summary>
         /// 创建任务，全部下载
         /// </summary>

@@ -22,6 +22,9 @@ namespace WkyApiSharp.Service.Model.ListPeer
 
         [JsonProperty("rtn")]
         public long Rtn { get; set; }
+
+        [JsonProperty("msg")]
+        public string Msg { get; set; }
     }
 
     public partial class ResultClass

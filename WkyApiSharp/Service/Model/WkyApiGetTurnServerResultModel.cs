@@ -22,6 +22,9 @@ namespace WkyApiSharp.Service.Model.GetTurnServerResult
 
         [JsonProperty("rtn")]
         public long Rtn { get; set; }
+
+        [JsonProperty("msg")]
+        public string Msg { get; set; }
     }
 
     public partial class TurnServerAddr

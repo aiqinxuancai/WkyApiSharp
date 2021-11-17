@@ -25,6 +25,9 @@ namespace WkyApiSharp.Service.Model.RemoteDownloadLogin
 
         [JsonProperty("rtn")]
         public long Rtn { get; set; }
+
+        [JsonProperty("msg")]
+        public string Msg { get; set; }
     }
 
     public partial class WkyApiRemoteDownloadLoginResultModel

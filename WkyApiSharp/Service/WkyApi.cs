@@ -84,12 +84,13 @@ namespace WkyApiSharp.Service
 
         private IFlurlRequest BaseHeader(string url)
         {
+            Debug.WriteLine(url);
             return url.WithHeader("cache-control", $"no-cache");
         }
 
         private IFlurlRequest BaseHeaderAndCookie(string url)
         {
-            Console.WriteLine(url);
+            
             return BaseHeader(url)
                 //.WithHeader("user-agent", $"MineCrafter3/{kAppVersion} (iPhone; iOS 15.0.1; Scale/3.00)")
                 //.WithHeader("cache-control", $"no-cache")
@@ -391,7 +392,8 @@ namespace WkyApiSharp.Service
 
             System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
 
-            var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}").PostMultipartAsync(mp => mp.Add("filepath", httpContent));
+            var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}")
+                .PostMultipartAsync(mp => mp.Add("filepath", httpContent));
 
 
             JsonConvert.SerializeObject(result.Cookies);

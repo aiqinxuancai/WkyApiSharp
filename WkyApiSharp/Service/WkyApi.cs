@@ -22,6 +22,7 @@ using WkyApiSharp.Service.Model.CreateBatchTask;
 using WkyApiSharp.Service.Model.CreateBatchTaskResult;
 using WkyApiSharp.Utils;
 using WkyApiSharp.Service.Model.GetTurnServerResult;
+using System.Net.Http;
 
 namespace WkyApiSharp.Service
 {
@@ -150,7 +151,7 @@ namespace WkyApiSharp.Service
                 string resultJson = await result.GetStringAsync();
                 JObject resultRoot = JObject.Parse(resultJson);
 
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 if (resultRoot.ContainsKey("sMsg") && resultRoot["sMsg"].ToString() == "Success")
                 {
                     UserInfo = resultRoot["data"].ToObject<WkyApiLoginResultModel>();
@@ -281,7 +282,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiRemoteDownloadLoginResultModel model = WkyApiRemoteDownloadLoginResultModel.FromJson(resultJson);
                 return model;
             }
@@ -314,7 +315,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiRemoteDownloadListResultModel model = WkyApiRemoteDownloadListResultModel.FromJson(resultJson);
                 return model;
             }
@@ -341,7 +342,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiUrlResolveResultModel model = WkyApiUrlResolveResultModel.FromJson(resultJson);
                 return model;
             }
@@ -361,19 +362,29 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "2"},
                 { "ct", "31"},
+                { "ct_ver", kAppVersion }
             };
             Debug.WriteLine(data);
 
-            System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(File.ReadAllBytes(filePath));
+            //var mpc = new MultipartContent();
+            //var sc = new StringContent("value");
+            //sc.Headers.Add("Content-Disposition", "form-data; name=\"some-label\"");
+            //mpc.Add(sc);
+            //var fc = new StreamContent(fs);
+            //fc.Headers.Add("Content-Disposition", "form-data; name=\"file\"; filename=\"my-filename.txt\"");
+            //mpc.Add(fc);
 
-            var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}").PostMultipartAsync(mp => mp.Add("filepath", httpContent));
 
+            //System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(File.ReadAllBytes(filePath));
+            var memoryStream = new FileStream(filePath, FileMode.Open);
+            var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}")
+                .PostMultipartAsync(mp => mp.AddFile("filepath", memoryStream, "dell.torrent", "application/octet-stream"));
 
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiBtCheckResultModel model = WkyApiBtCheckResultModel.FromJson(resultJson);
                 return model;
             }
@@ -387,20 +398,24 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "2"},
                 { "ct", "31"},
+                { "ct_ver", kAppVersion }
             };
             Debug.WriteLine(data);
 
             System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
+            var memoryStream = new MemoryStream(fileData);
 
+
+            //AddString("filaname","dell.torrent").Add("filepath", httpContent)
             var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}")
-                .PostMultipartAsync(mp => mp.Add("filepath", httpContent));
-
+                .PostMultipartAsync(mp => mp.AddFile("filepath", memoryStream, "dell.torrent", "application/octet-stream"));
+            //AddString("filaname", "dell.torrent").Add("filepath", httpContent)
 
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiBtCheckResultModel model = WkyApiBtCheckResultModel.FromJson(resultJson);
                 return model;
             }
@@ -430,7 +445,10 @@ namespace WkyApiSharp.Service
             task.Infohash = urlModel.Infohash ;
             task.Name = urlModel.TaskInfo.Name;
             task.Url = urlModel.TaskInfo.Url;
-
+            if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
+            {
+                task.Url = $"magnet:?xt=urn:btih:{urlModel.Infohash}";
+            }
             List<Model.CreateTask.Task> tasks = new List<Model.CreateTask.Task>();
             tasks.Add(task);
 
@@ -444,7 +462,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiCreateTaskResultModel model = WkyApiCreateTaskResultModel.FromJson(resultJson);
                 return model;
             }
@@ -474,6 +492,10 @@ namespace WkyApiSharp.Service
             task.Infohash = urlModel.Infohash;
             task.Name = urlModel.TaskInfo.Name;
             task.Url = urlModel.TaskInfo.Url;
+            if (!string.IsNullOrWhiteSpace(task.Infohash) && string.IsNullOrWhiteSpace(task.Url))
+            {
+                task.Url = $"magnet:?xt=urn:btih:{task.Infohash}";
+            }
 
             List<Model.CreateTask.Task> tasks = new List<Model.CreateTask.Task>();
             tasks.Add(task);
@@ -488,7 +510,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiCreateTaskResultModel model = WkyApiCreateTaskResultModel.FromJson(resultJson);
                 return model;
             }
@@ -535,6 +557,11 @@ namespace WkyApiSharp.Service
                 task.BtSub = subTask.ToArray();
             }
 
+            if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
+            {
+                task.Url = $"magnet:?xt=urn:btih:{urlModel.Infohash}";
+            }
+
             List<Model.CreateBatchTask.Task> tasks = new List<Model.CreateBatchTask.Task>();
             tasks.Add(task);
 
@@ -548,7 +575,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiCreateBatchTaskResultModel model = WkyApiCreateBatchTaskResultModel.FromJson(resultJson);
                 return model;
             }
@@ -580,6 +607,11 @@ namespace WkyApiSharp.Service
             task.Url = urlModel.TaskInfo.Url;
             task.Type = urlModel.TaskInfo.Type;
 
+            if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
+            {
+                task.Url = $"magnet:?xt=urn:btih:{urlModel.Infohash}";
+            }
+
             if (subTask == null)
             {
                 List<long> taskIds = new List<long>();
@@ -607,7 +639,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Console.WriteLine(resultJson);
+                Debug.WriteLine(resultJson);
                 WkyApiCreateBatchTaskResultModel model = WkyApiCreateBatchTaskResultModel.FromJson(resultJson);
                 return model;
             }
@@ -637,6 +669,7 @@ namespace WkyApiSharp.Service
             {
                 //{"tasks":[],"rtn":0}
                 string resultJson = await result.GetStringAsync();
+                Debug.WriteLine(resultJson);
                 JObject root = JObject.Parse(resultJson);
                 if (root.ContainsKey("rtn") && root["rtn"].ToObject<int>() == 0)
                 {
@@ -669,6 +702,7 @@ namespace WkyApiSharp.Service
             {
                 //{"tasks":[],"rtn":0}
                 string resultJson = await result.GetStringAsync();
+                Debug.WriteLine(resultJson);
                 JObject root = JObject.Parse(resultJson);
                 if (root.ContainsKey("rtn") && root["rtn"].ToObject<int>() == 0)
                 {
@@ -706,6 +740,7 @@ namespace WkyApiSharp.Service
             {
                 //{"tasks":[],"rtn":0}
                 string resultJson = await result.GetStringAsync();
+                Debug.WriteLine(resultJson);
                 JObject root = JObject.Parse(resultJson);
                 if (root.ContainsKey("rtn") && root["rtn"].ToObject<int>() == 0)
                 {

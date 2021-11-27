@@ -366,15 +366,6 @@ namespace WkyApiSharp.Service
             };
             Debug.WriteLine(data);
 
-            //var mpc = new MultipartContent();
-            //var sc = new StringContent("value");
-            //sc.Headers.Add("Content-Disposition", "form-data; name=\"some-label\"");
-            //mpc.Add(sc);
-            //var fc = new StreamContent(fs);
-            //fc.Headers.Add("Content-Disposition", "form-data; name=\"file\"; filename=\"my-filename.txt\"");
-            //mpc.Add(fc);
-
-
             //System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(File.ReadAllBytes(filePath));
             var memoryStream = new FileStream(filePath, FileMode.Open);
             var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}")
@@ -402,14 +393,11 @@ namespace WkyApiSharp.Service
             };
             Debug.WriteLine(data);
 
-            System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
+            //System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
             var memoryStream = new MemoryStream(fileData);
 
-
-            //AddString("filaname","dell.torrent").Add("filepath", httpContent)
             var result = await BaseHeaderAndCookie(kBtCheckUrl + $"?{DictionaryToParamsString(data)}")
                 .PostMultipartAsync(mp => mp.AddFile("filepath", memoryStream, "dell.torrent", "application/octet-stream"));
-            //AddString("filaname", "dell.torrent").Add("filepath", httpContent)
 
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)

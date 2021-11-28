@@ -191,7 +191,7 @@ namespace WkyApiSharp.Service
             }, UserInfo.SessionId);
 
             //&ct=5&v=8(PC)
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kListPeerURL + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -219,7 +219,7 @@ namespace WkyApiSharp.Service
                 {"ct", "9"},
                 {"deviceid", deviceId}
             }, UserInfo.SessionId);
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kPeerUSBInfoUrl + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -247,7 +247,7 @@ namespace WkyApiSharp.Service
                 {"ct", "5"},
                 {"sn", sn}
             }, UserInfo.SessionId);
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kGetTurnServer + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -276,7 +276,7 @@ namespace WkyApiSharp.Service
                 {"v", "1"},
                 {"ct", "32"},
             }, UserInfo.SessionId);
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kLoginRemoteDlUrl + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -309,7 +309,7 @@ namespace WkyApiSharp.Service
                 { "v", "2"},
                 { "ct", "31"},
             }, UserInfo.SessionId);
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kListRemoteDlInfoUrl + data).GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -336,7 +336,7 @@ namespace WkyApiSharp.Service
                 { "v", "1"},
                 { "ct", "31"},
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kUrlResolveUrl + $"?{DictionaryToParamsString(data)}").PostUrlEncodedAsync($"url={url}");
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -364,7 +364,7 @@ namespace WkyApiSharp.Service
                 { "ct", "31"},
                 { "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             //System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(File.ReadAllBytes(filePath));
             var memoryStream = new FileStream(filePath, FileMode.Open);
@@ -391,7 +391,7 @@ namespace WkyApiSharp.Service
                 { "ct", "31"},
                 { "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             //System.Net.Http.ByteArrayContent httpContent = new System.Net.Http.ByteArrayContent(fileData);
             var memoryStream = new MemoryStream(fileData);
@@ -416,7 +416,7 @@ namespace WkyApiSharp.Service
         /// <param name="peerId"></param>
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
-        /// <returns></returns>
+        /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
         public async Task<WkyApiCreateTaskResultModel> CreateTaskWithUrlResolve(string peerId, string path, WkyApiUrlResolveResultModel urlModel)
         {
             var data = new Dictionary<string, string>()
@@ -424,8 +424,9 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "1"},
                 { "ct", "31"},
+                { "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             WkyApiCreateTaskModel sendModel = new WkyApiCreateTaskModel();
             Model.CreateTask.Task task = new Model.CreateTask.Task();
@@ -442,7 +443,7 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
-
+            Debug.WriteLine(sendModel.ToJson());
             var result = await BaseHeaderAndCookie(kCreateTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
 
@@ -463,7 +464,7 @@ namespace WkyApiSharp.Service
         /// <param name="peerId"></param>
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
-        /// <returns></returns>
+        /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
         public async Task<WkyApiCreateTaskResultModel> CreateTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel)
         {
             var data = new Dictionary<string, string>()
@@ -471,8 +472,9 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "1"},
                 { "ct", "31"},
+                { "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             WkyApiCreateTaskModel sendModel = new WkyApiCreateTaskModel();
             Model.CreateTask.Task task = new Model.CreateTask.Task();
@@ -490,7 +492,7 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
-
+            Debug.WriteLine(sendModel.ToJson());
             var result = await BaseHeaderAndCookie(kCreateTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
 
@@ -513,7 +515,7 @@ namespace WkyApiSharp.Service
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
         /// <param name="subTask">如BT内的子文件ID，从解析后的任务中获取，为null则全部下载</param>
-        /// <returns></returns>
+        /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
         public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithUrlResolve(string peerId, string path, WkyApiUrlResolveResultModel urlModel, List<long> subTask)
         {
             var data = new Dictionary<string, string>()
@@ -521,8 +523,9 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "2"},
                 { "ct", "31"},
+                //{ "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             WkyApiCreateBatchTaskModel sendModel = new WkyApiCreateBatchTaskModel();
             Model.CreateBatchTask.Task task = new Model.CreateBatchTask.Task();
@@ -530,6 +533,11 @@ namespace WkyApiSharp.Service
             task.Name = urlModel.TaskInfo.Name;
             task.Url = urlModel.TaskInfo.Url;
             task.Type = urlModel.TaskInfo.Type;
+
+            task.RefUrl = "";
+            task.Localfile = "";
+            task.Gcid = "";
+            task.Cid = "";
 
             if (subTask == null)
             {
@@ -555,7 +563,7 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
-
+            Debug.WriteLine(sendModel.ToJson());
             var result = await BaseHeaderAndCookie(kCreateBatchTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
 
@@ -577,7 +585,7 @@ namespace WkyApiSharp.Service
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
         /// <param name="subTask">如BT内的子文件ID，从解析后的任务中获取</param>
-        /// <returns></returns>
+        /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
         public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel, List<long> subTask)
         {
             var data = new Dictionary<string, string>()
@@ -585,8 +593,9 @@ namespace WkyApiSharp.Service
                 { "pid", peerId },
                 { "v", "2"},
                 { "ct", "31"},
+                //{ "ct_ver", kAppVersion }
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
 
             WkyApiCreateBatchTaskModel sendModel = new WkyApiCreateBatchTaskModel();
             Model.CreateBatchTask.Task task = new Model.CreateBatchTask.Task();
@@ -594,6 +603,11 @@ namespace WkyApiSharp.Service
             task.Name = urlModel.TaskInfo.Name;
             task.Url = urlModel.TaskInfo.Url;
             task.Type = urlModel.TaskInfo.Type;
+
+            task.RefUrl = "";
+            task.Localfile = "";
+            task.Gcid = "";
+            task.Cid = "";
 
             if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
             {
@@ -619,6 +633,8 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
+
+            Debug.WriteLine(sendModel.ToJson());
 
             var result = await BaseHeaderAndCookie(kCreateBatchTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
@@ -650,7 +666,7 @@ namespace WkyApiSharp.Service
                 { "ct", "31"},
                 { "tasks", taskId}, //id_state_type
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kPauseTaskUrl + $"?{DictionaryToParamsString(data)}").GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -683,7 +699,7 @@ namespace WkyApiSharp.Service
                 { "ct", "31"},
                 { "tasks", taskId}, //id_state_type
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kStartTaskUrl + $"?{DictionaryToParamsString(data)}").GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)
@@ -721,7 +737,7 @@ namespace WkyApiSharp.Service
                 { "deleteFile", deleteFile ? "true" : "false"},
                 { "recycleTask", recycleTask ? "true" : "false"},
             };
-            Debug.WriteLine(data);
+            Debug.WriteLine(JsonConvert.SerializeObject(data));
             var result = await BaseHeaderAndCookie(kDelTaskUrl + $"?{DictionaryToParamsString(data)}").GetAsync();
             JsonConvert.SerializeObject(result.Cookies);
             if (result.StatusCode == 200)

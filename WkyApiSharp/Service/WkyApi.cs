@@ -26,10 +26,18 @@ using System.Net.Http;
 
 namespace WkyApiSharp.Service
 {
+    public enum WkyLoginDeviceType
+    {
+        Mobile = 0, //传递 imeiid + deviceid
+        PC = 1, // 传递 peerId（MD5的长度） + product_id=0 本地固定，来源随机？
+    }
+
     public class WkyApi : WkyApiBase
     {
         private string _user = ""; //可能是手机号也可能是邮箱
         private string _password = "";
+        private WkyLoginDeviceType _wkyLoginDeviceType;
+
 
         public WkyApiLoginResultModel UserInfo { set; get; } = new WkyApiLoginResultModel();
 
@@ -41,21 +49,23 @@ namespace WkyApiSharp.Service
         /// </summary>
         /// <param name="user"></param>
         /// <param name="password"></param>
-        public WkyApi(string user, string password)
+        public WkyApi(string user, string password, WkyLoginDeviceType wkyLoginDeviceType = WkyLoginDeviceType.Mobile)
         {
             _user = user;
             _password = password;
+            _wkyLoginDeviceType = wkyLoginDeviceType;
         }
 
         /// <summary>
         /// 从存储的Session文件内容初始化
         /// </summary>
         /// <param name="filePath"></param>
-        public WkyApi(string sessionContent, string user = "", string password = "")
+        public WkyApi(string sessionContent, string user, string password, WkyLoginDeviceType wkyLoginDeviceType = WkyLoginDeviceType.Mobile)
         {
             UserInfo = JsonConvert.DeserializeObject<WkyApiLoginResultModel>(sessionContent);
             _user = user;
             _password = password;
+            _wkyLoginDeviceType = wkyLoginDeviceType;
         }
 
         /// <summary>
@@ -107,33 +117,32 @@ namespace WkyApiSharp.Service
         {
             Dictionary<string, string> loginData;
 
+            Dictionary<string, string> args = new Dictionary<string, string>();
+
+
             //判断email
             if (RegexUtilities.IsValidEmail(_user))
             {
-                loginData = GenerateBody(new Dictionary<string, string>()
-                    { 
-                        { "phone_area", "Email" },
-                        { "deviceid", GetDevice(_user) },
-                        { "imeiid" , GetIMEI(_user)},
-                        { "phone" , _user},
-                        { "pwd" , GetPassword(_password)},
-                        { "account_type" , "5"},
-                    });
+                args["phone_area"] = "Email";
             }
-            else
+
+            if (_wkyLoginDeviceType == WkyLoginDeviceType.Mobile)
             {
-                loginData = GenerateBody(new Dictionary<string, string>()
-                    {
-                        { "deviceid", GetDevice(_user) },
-                        { "imeiid" , GetIMEI(_user)},
-                        { "phone" , _user},
-                        { "pwd" , GetPassword(_password)},
-                        { "account_type" , "4"},
-                    });
+                args["imeiid"] = GetIMEI(_user);
+                args["deviceid"] = GetDevice(_user);
             }
+            else if (_wkyLoginDeviceType == WkyLoginDeviceType.PC)
+            {
+                args["peerid"] = GetPeerId(_user);
+                args["product_id"] = "0";
+            }
+
+            args["phone"] = _user;
+            args["pwd"] = GetPassword(_password);
+
+            loginData = GenerateBody(args);
 
             Debug.WriteLine(loginData);
-
             Debug.WriteLine(JsonConvert.SerializeObject(loginData));
 
             var result = await BaseHeader(kLoginUrl)

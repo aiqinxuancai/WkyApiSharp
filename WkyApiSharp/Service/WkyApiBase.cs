@@ -48,6 +48,12 @@ namespace WkyApiSharp.Service
             return s;
         }
 
+        public static string GetPeerId(string user)
+        {
+            var s = MD5Helper.GetMD5(user).ToUpper();
+            return s;
+        }
+
         public static string GetIMEI(string user)
         {
             var s = MD5Helper.GetMD5(user).ToLower()[..16];

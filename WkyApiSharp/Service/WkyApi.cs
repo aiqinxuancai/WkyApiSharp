@@ -119,11 +119,13 @@ namespace WkyApiSharp.Service
 
             Dictionary<string, string> args = new Dictionary<string, string>();
 
+            args["account_type"] = "4";
 
             //判断email
             if (RegexUtilities.IsValidEmail(_user))
             {
                 args["phone_area"] = "Email";
+                args["account_type"] = "5";
             }
 
             if (_wkyLoginDeviceType == WkyLoginDeviceType.Mobile)

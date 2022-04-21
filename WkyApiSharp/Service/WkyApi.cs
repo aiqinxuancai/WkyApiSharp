@@ -503,7 +503,7 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
-            Debug.WriteLine(sendModel.ToJson());
+            Debug.WriteLine("sendJson:"  + sendModel.ToJson());
             var result = await BaseHeaderAndCookie(kCreateTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
 
@@ -511,7 +511,7 @@ namespace WkyApiSharp.Service
             if (result.StatusCode == 200)
             {
                 string resultJson = await result.GetStringAsync();
-                Debug.WriteLine(resultJson);
+                Debug.WriteLine("resultJson:" + resultJson);
                 WkyApiCreateTaskResultModel model = WkyApiCreateTaskResultModel.FromJson(resultJson);
                 return model;
             }

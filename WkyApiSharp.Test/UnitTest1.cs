@@ -104,17 +104,17 @@ namespace WkyApiSharp.Test
         [TestMethod]
         public void CompareStringTest()
         {
-            Debug.WriteLine(PythonSort.CompareString("CRRtyEb9GTKFo", "AnG0uH7X0WFeFy"));
+            //Debug.WriteLine(PythonSort.CompareString("CRRtyEb9GTKFo", "AnG0uH7X0WFeFy"));
 
-            Debug.WriteLine(PythonSort.CompareString("hBownxyj4yYx", "psD4O"));
+            //Debug.WriteLine(PythonSort.CompareString("hBownxyj4yYx", "psD4O"));
 
-            Debug.WriteLine(PythonSort.CompareString("cugulmKdciHQZDKB", "Btf3XpMvouvEo0fJ"));
+            //Debug.WriteLine(PythonSort.CompareString("cugulmKdciHQZDKB", "Btf3XpMvouvEo0fJ"));
 
-            Debug.WriteLine(PythonSort.CompareString("6xfA1IyQRYkrG2MN", "bgp3oGHs44YnWc07"));
+            //Debug.WriteLine(PythonSort.CompareString("6xfA1IyQRYkrG2MN", "bgp3oGHs44YnWc07"));
 
-            Debug.WriteLine(PythonSort.CompareString("Sn9xQ73jVYSim2B3", "Jl79IGZtqTphlxn5"));
+            //Debug.WriteLine(PythonSort.CompareString("Sn9xQ73jVYSim2B3", "Jl79IGZtqTphlxn5"));
 
-            Debug.WriteLine(PythonSort.CompareString("Sn9xQ73jVYSim2B3", "Sn9xQ73jVYSim2B3"));
+            //Debug.WriteLine(PythonSort.CompareString("Sn9xQ73jVYSim2B3", "Sn9xQ73jVYSim2B3"));
 
             Debug.WriteLine("---------------------");
 

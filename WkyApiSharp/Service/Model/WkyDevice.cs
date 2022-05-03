@@ -13,10 +13,8 @@ namespace WkyApiSharp.Service.Model
             Device = device;
         }
 
-
         private ListPeer.Device _device;
 
-        //属于的Peer
         public ListPeer.Device Device
         {
             set

@@ -10,11 +10,13 @@ namespace WkyApiSharp.Events.Account
     /// </summary>
     public record DownloadSuccessEvent : EventBase
     {
-        public bool IsSuccess { get; set; }
-
         //TODO 设备信息
+        public WkyPeer Peer { get; set; }
+
+
         //TODO 任务信息
-        
+        public WkyTask Task { get; set; }
+
         /// <summary>
         /// 事件类型
         /// </summary>

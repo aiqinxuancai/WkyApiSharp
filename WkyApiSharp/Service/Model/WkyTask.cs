@@ -14,7 +14,6 @@ namespace WkyApiSharp.Service.Model
         PreparingAdd//14 => "准备添加中",
     }
 
-    
     public record WkyTask
     {
         public RemoteDownloadList.Task Data { get; set; }

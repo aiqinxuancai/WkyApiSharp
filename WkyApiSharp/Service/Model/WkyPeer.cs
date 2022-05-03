@@ -68,7 +68,6 @@ namespace WkyApiSharp.Service.Model
 
         private readonly List<WkyTask> _tasks = new();
 
-
         public async Task<bool> LoginPeer(WkyApi api)
         {
             for (var i = 0; i < 3; i++)

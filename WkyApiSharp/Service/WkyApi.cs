@@ -57,13 +57,22 @@ namespace WkyApiSharp.Service
         private readonly Subject<EventBase> _eventReceivedSubject = new();
 
 
+        /// <summary>
+        /// 玩客云设备
+        /// </summary>
+        public List<ListPeerResult> PeerList => _peerList;
+
+        private readonly List<ListPeerResult> _peerList = new();
+
+
+        /// <summary>
+        /// 玩客云设备中的存储器 TODO DeviceList应该为PeerList的子项目
+        /// </summary>
         public List<Device> DeviceList => _deviceList;
 
         private readonly List<Device> _deviceList = new();
 
-        public List<ListPeerResult> PeerList => _peerList;
 
-        private readonly List<ListPeerResult> _peerList = new();
 
 
         //session过期时间

@@ -23,6 +23,11 @@ using WkyApiSharp.Service.Model.CreateBatchTaskResult;
 using WkyApiSharp.Utils;
 using WkyApiSharp.Service.Model.GetTurnServerResult;
 using System.Net.Http;
+using WkyApiSharp.Events;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
+using Task = System.Threading.Tasks.Task;
+using WkyApiSharp.Events.Account;
 
 namespace WkyApiSharp.Service
 {
@@ -36,13 +41,35 @@ namespace WkyApiSharp.Service
     {
         private string _user = ""; //可能是手机号也可能是邮箱
         private string _password = "";
+
+        private string _sessionName = "";
+
+
         private WkyLoginDeviceType _wkyLoginDeviceType;
 
 
         public WkyApiLoginResultModel UserInfo { set; get; } = new WkyApiLoginResultModel();
 
+
+        //事件
+        public IObservable<EventBase> EventReceived => _eventReceivedSubject.AsObservable();
+
+        private readonly Subject<EventBase> _eventReceivedSubject = new();
+
+
+        public List<Device> DeviceList => _deviceList;
+
+        private readonly List<Device> _deviceList = new();
+
+        public List<ListPeerResult> PeerList => _peerList;
+
+        private readonly List<ListPeerResult> _peerList = new();
+
+
         //session过期时间
         const int kCookieMaxAge = 604800; 
+
+
 
         /// <summary>
         /// 从用户名密码初始化
@@ -54,25 +81,148 @@ namespace WkyApiSharp.Service
             _user = user;
             _password = password;
             _wkyLoginDeviceType = wkyLoginDeviceType;
+
+            _sessionName = @$"{MD5Helper.GetMD5(_user)}.session";
+
+            //检查session是否存在，否则重新登录
+            if (File.Exists(_sessionName))
+            {
+                UserInfo = JsonConvert.DeserializeObject<WkyApiLoginResultModel>(File.ReadAllText(_sessionName));
+            }
         }
 
+
+
+        #region Public
+
         /// <summary>
-        /// 从存储的Session文件内容初始化
+        /// 登录的原生
         /// </summary>
-        /// <param name="filePath"></param>
-        public WkyApi(string sessionContent, string user, string password, WkyLoginDeviceType wkyLoginDeviceType = WkyLoginDeviceType.Mobile)
+        /// <returns></returns>
+        public async Task<bool> StartLogin()
         {
-            UserInfo = JsonConvert.DeserializeObject<WkyApiLoginResultModel>(sessionContent);
-            _user = user;
-            _password = password;
-            _wkyLoginDeviceType = wkyLoginDeviceType;
+            bool isSuccess = false;
+            string errorMessage = string.Empty;
+            if (!string.IsNullOrWhiteSpace(UserInfo.Phone) && !IsSessionExpired())
+            {
+                //自动登录
+                for (int i = 0; i < 3; i++)
+                {
+                    try
+                    {
+                        var listPeer = await this.ListPeer(); //检查session是否可用
+                        if (listPeer.Rtn == 0)
+                        {
+                            isSuccess = true;
+                            break;
+                        }
+                        else //失败 API层失败
+                        {
+                            await Task.Delay(1000);
+                        }
+                    } 
+                    catch (Exception ex) //失败
+                    {
+                        await Task.Delay(1000);
+                    }
+                }
+            }
+
+            if (!isSuccess)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    try
+                    {
+                        var loginResult = await Login();
+                        if (loginResult)
+                        {
+                            //登录成功，保存session
+                            var sessionContent = this.GetSessionContent();
+                            File.WriteAllText(_sessionName, sessionContent);
+                            isSuccess = true;
+                            break;
+                        }
+                    } 
+                    catch (WkyApiException ex)
+                    {
+                        errorMessage = ex.Message;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        //网络错误等因素
+                    }
+
+                }
+            }
+
+            if (isSuccess)
+            {
+                _eventReceivedSubject.OnNext(new LoginResultEvent() { isSuccess = true, errorMessage= "" });
+                //异步更新设备 更新USB存储设备
+                UpdateDevice();
+                return true;
+            }
+            else
+            {
+                _eventReceivedSubject.OnNext(new LoginResultEvent() { isSuccess = false, errorMessage = errorMessage });
+                return false;
+            }
         }
+
+        #endregion
+
+
+        #region Private 
+        private async Task<int> UpdateDevice()
+        {
+            try
+            {
+                //获取设备信息
+                var listPeerResult = await this.ListPeer();
+
+                if (listPeerResult.Rtn == 0)
+                {
+                    _peerList.Clear();
+                    foreach (var item in listPeerResult.Result)
+                    {
+                        if (item.ResultClass != null)
+                        {
+                            _peerList.Add(item.ResultClass);
+                        }
+                    }
+
+                    _deviceList.Clear();
+                    foreach (var peer in _peerList)
+                    {
+                        foreach (var device in peer.Devices)
+                        {
+                            _deviceList.Add(device);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new WkyApiException("获取Peer失败");
+                }
+            } 
+            catch (Exception ex)
+            {
+                
+            }
+            return _deviceList.Count;
+        }
+        #endregion
+
+
+        #region BaseHelper
 
         /// <summary>
         /// 存储的session是否过期
         /// </summary>
         /// <returns></returns>
-        public bool IsSessionExpired()
+        private bool IsSessionExpired()
         {
             //检测过期？
             var interval = DateTime.Now - UserInfo.CreateDateTime;
@@ -88,7 +238,7 @@ namespace WkyApiSharp.Service
         /// Login后可调用此接口返回Session，在后续的wkyapi中初始化可用
         /// </summary>
         /// <returns></returns>
-        public string GetSessionContent()
+        private string GetSessionContent()
         {
             return JsonConvert.SerializeObject(UserInfo);
         }
@@ -108,6 +258,13 @@ namespace WkyApiSharp.Service
                 .WithCookie("userid", UserInfo.UserId)
                 .WithCookie("sessionid", UserInfo.SessionId);
         }
+
+        #endregion
+
+
+
+        #region API Protocol
+
 
         /// <summary>
         /// 登录玩客云
@@ -167,6 +324,7 @@ namespace WkyApiSharp.Service
                 {
                     UserInfo = resultRoot["data"].ToObject<WkyApiLoginResultModel>();
                     UserInfo.CreateDateTime = DateTime.Now;
+                    //_eventReceivedSubject.OnNext()
                     return true;
                 }
                 else
@@ -765,6 +923,6 @@ namespace WkyApiSharp.Service
             }
             return false;
         }
-
+        #endregion
     }
 }

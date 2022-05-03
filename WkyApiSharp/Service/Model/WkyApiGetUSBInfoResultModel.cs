@@ -27,7 +27,7 @@ namespace WkyApiSharp.Service.Model.GetUsbInfo
         public long Rtn { get; set; }
     }
 
-    public partial class ResultClass
+    public partial class GetUsbInfoResult
     {
         [JsonProperty("partitions")]
         public Partition[] Partitions { get; set; }
@@ -78,10 +78,10 @@ namespace WkyApiSharp.Service.Model.GetUsbInfo
     public partial struct ResultElement
     {
         public long? Integer;
-        public ResultClass ResultClass;
+        public GetUsbInfoResult ResultClass;
 
         public static implicit operator ResultElement(long Integer) => new ResultElement { Integer = Integer };
-        public static implicit operator ResultElement(ResultClass ResultClass) => new ResultElement { ResultClass = ResultClass };
+        public static implicit operator ResultElement(GetUsbInfoResult ResultClass) => new ResultElement { ResultClass = ResultClass };
     }
 
     public partial class WkyApiGetUsbInfoResultModel
@@ -120,7 +120,7 @@ namespace WkyApiSharp.Service.Model.GetUsbInfo
                     var integerValue = serializer.Deserialize<long>(reader);
                     return new ResultElement { Integer = integerValue };
                 case JsonToken.StartObject:
-                    var objectValue = serializer.Deserialize<ResultClass>(reader);
+                    var objectValue = serializer.Deserialize<GetUsbInfoResult>(reader);
                     return new ResultElement { ResultClass = objectValue };
             }
             throw new Exception("Cannot unmarshal type ResultElement");

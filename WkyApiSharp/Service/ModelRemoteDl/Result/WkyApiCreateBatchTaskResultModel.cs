@@ -21,13 +21,13 @@ namespace WkyApiSharp.Service.Model.CreateBatchTaskResult
         public long Rtn { get; set; }
 
         [JsonProperty("tasks")]
-        public Task[] Tasks { get; set; }
+        public CreateBatchTask[] Tasks { get; set; }
 
         [JsonProperty("msg")]
         public string Msg { get; set; }
     }
 
-    public partial class Task
+    public partial class CreateBatchTask
     {
         [JsonProperty("msg")]
         public string Msg { get; set; }

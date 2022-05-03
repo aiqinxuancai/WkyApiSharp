@@ -27,7 +27,7 @@ namespace WkyApiSharp.Service.Model.ListPeer
         public string Msg { get; set; }
     }
 
-    public partial class ResultClass
+    public partial class ListPeerResult
     {
         [JsonProperty("global_appearance")]
         public long GlobalAppearance { get; set; }
@@ -194,10 +194,10 @@ namespace WkyApiSharp.Service.Model.ListPeer
     public partial struct ResultElement
     {
         public long? Integer;
-        public ResultClass ResultClass;
+        public ListPeerResult ResultClass;
 
         public static implicit operator ResultElement(long Integer) => new ResultElement { Integer = Integer };
-        public static implicit operator ResultElement(ResultClass ResultClass) => new ResultElement { ResultClass = ResultClass };
+        public static implicit operator ResultElement(ListPeerResult ResultClass) => new ResultElement { ResultClass = ResultClass };
     }
 
     public partial class WkyApiListPeerResultModel
@@ -236,7 +236,7 @@ namespace WkyApiSharp.Service.Model.ListPeer
                     var integerValue = serializer.Deserialize<long>(reader);
                     return new ResultElement { Integer = integerValue };
                 case JsonToken.StartObject:
-                    var objectValue = serializer.Deserialize<ResultClass>(reader);
+                    var objectValue = serializer.Deserialize<ListPeerResult>(reader);
                     return new ResultElement { ResultClass = objectValue };
             }
             throw new Exception("Cannot unmarshal type ResultElement");

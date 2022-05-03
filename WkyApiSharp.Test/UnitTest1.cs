@@ -2,6 +2,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive.Linq;
+using WkyApiSharp.Events.Account;
 using WkyApiSharp.Service;
 using WkyApiSharp.Utils;
 
@@ -19,6 +21,16 @@ namespace WkyApiSharp.Test
             {
                 //上次登录文件初始化
                 WkyApi wkyApi = new WkyApi(File.ReadAllText("session.json"));
+
+
+                wkyApi.EventReceived
+                .OfType<LoginResultEvent>()
+                .Subscribe(async r =>
+                {
+
+                });
+
+
                 //var listPeerResult = wkyApi.ListPeer().Result;
                 DeviceTest(wkyApi);
             }

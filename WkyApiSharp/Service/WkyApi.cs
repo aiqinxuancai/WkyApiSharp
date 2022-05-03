@@ -168,14 +168,14 @@ namespace WkyApiSharp.Service
 
             if (isSuccess)
             {
-                _eventReceivedSubject.OnNext(new LoginResultEvent() { isSuccess = true, errorMessage= "" });
+                _eventReceivedSubject.OnNext(new LoginResultEvent(true, ""));
                 //异步更新设备 更新USB存储设备
                 UpdateDevice();
                 return true;
             }
             else
             {
-                _eventReceivedSubject.OnNext(new LoginResultEvent() { isSuccess = false, errorMessage = errorMessage });
+                _eventReceivedSubject.OnNext(new LoginResultEvent(false, errorMessage));
                 return false;
             }
         }

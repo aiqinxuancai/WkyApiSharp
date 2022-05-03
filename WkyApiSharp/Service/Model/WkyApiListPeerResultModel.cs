@@ -27,7 +27,7 @@ namespace WkyApiSharp.Service.Model.ListPeer
         public string Msg { get; set; }
     }
 
-    public partial class ListPeerResult
+    public partial class Peer
     {
         [JsonProperty("global_appearance")]
         public long GlobalAppearance { get; set; }
@@ -194,10 +194,10 @@ namespace WkyApiSharp.Service.Model.ListPeer
     public partial struct ResultElement
     {
         public long? Integer;
-        public ListPeerResult ResultClass;
+        public Peer Peer;
 
         public static implicit operator ResultElement(long Integer) => new ResultElement { Integer = Integer };
-        public static implicit operator ResultElement(ListPeerResult ResultClass) => new ResultElement { ResultClass = ResultClass };
+        public static implicit operator ResultElement(Peer ResultClass) => new ResultElement { Peer = ResultClass };
     }
 
     public partial class WkyApiListPeerResultModel
@@ -236,8 +236,8 @@ namespace WkyApiSharp.Service.Model.ListPeer
                     var integerValue = serializer.Deserialize<long>(reader);
                     return new ResultElement { Integer = integerValue };
                 case JsonToken.StartObject:
-                    var objectValue = serializer.Deserialize<ListPeerResult>(reader);
-                    return new ResultElement { ResultClass = objectValue };
+                    var objectValue = serializer.Deserialize<Peer>(reader);
+                    return new ResultElement { Peer = objectValue };
             }
             throw new Exception("Cannot unmarshal type ResultElement");
         }
@@ -250,9 +250,9 @@ namespace WkyApiSharp.Service.Model.ListPeer
                 serializer.Serialize(writer, value.Integer.Value);
                 return;
             }
-            if (value.ResultClass != null)
+            if (value.Peer != null)
             {
-                serializer.Serialize(writer, value.ResultClass);
+                serializer.Serialize(writer, value.Peer);
                 return;
             }
             throw new Exception("Cannot marshal type ResultElement");

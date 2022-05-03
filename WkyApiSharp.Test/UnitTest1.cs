@@ -17,41 +17,37 @@ namespace WkyApiSharp.Test
         {
 
             Console.WriteLine("Hello World!");
-            if (File.Exists("session.json"))
-            {
-                //上次登录文件初始化
-                WkyApi wkyApi = new WkyApi(File.ReadAllText("session.json"));
+            //账号密码初始化
+            var user = File.ReadAllText("user.txt");
+            var password = File.ReadAllText("password.txt");
+            WkyApi wkyApi = new WkyApi(user, password, WkyLoginDeviceType.PC);
 
-
-                wkyApi.EventReceived
+            wkyApi.EventReceived
                 .OfType<LoginResultEvent>()
                 .Subscribe(async r =>
                 {
+                    if (r.IsSuccess)
+                    {
 
+                    }
                 });
 
-
-                //var listPeerResult = wkyApi.ListPeer().Result;
-                DeviceTest(wkyApi);
-            }
-            else
-            {
-                //账号密码初始化
-                var user = File.ReadAllText("user.txt");
-                var password = File.ReadAllText("password.txt");
-                WkyApi wkyApi = new WkyApi(user, password);
-                var result = wkyApi.Login().Result;
-                if (result)
+            wkyApi.EventReceived
+                .OfType<UpdateDeviceResultEvent>()
+                .Subscribe(async r =>
                 {
-                    var cookiesString = wkyApi.GetSessionContent();
-                    File.WriteAllText("session.json", cookiesString);
+                    if (r.IsSuccess)
+                    {
 
-                    DeviceTest(wkyApi);
+                    }
+                });
 
-                }
+            var result = wkyApi.StartLogin().Result;
+            if (result)
+            {
+                //DeviceTest(wkyApi);
             }
         }
-
 
         public void DeviceTest(WkyApi wkyApi)
         {
@@ -62,9 +58,9 @@ namespace WkyApiSharp.Test
 
             foreach (var item in listPeerResult.Result)
             {
-                if (item.ResultClass != null)
+                if (item.Peer != null)
                 {
-                    foreach (var device in item.ResultClass.Devices)
+                    foreach (var device in item.Peer.Devices)
                     {
                         //获取设备的USB信息（存储设备信息）
                         var getUsbInfoResult = wkyApi.GetUsbInfo(device.DeviceId).Result;

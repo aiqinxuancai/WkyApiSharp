@@ -60,17 +60,9 @@ namespace WkyApiSharp.Service
         /// <summary>
         /// 玩客云设备
         /// </summary>
-        public List<ListPeerResult> PeerList => _peerList;
+        public List<WkyPeer> PeerList => _peerList;
 
-        private readonly List<ListPeerResult> _peerList = new();
-
-
-        /// <summary>
-        /// 玩客云设备中的存储器 TODO DeviceList应该为PeerList的子项目
-        /// </summary>
-        public List<Device> DeviceList => _deviceList;
-
-        private readonly List<Device> _deviceList = new();
+        private readonly List<WkyPeer> _peerList = new();
 
 
 
@@ -170,7 +162,7 @@ namespace WkyApiSharp.Service
             {
                 _eventReceivedSubject.OnNext(new LoginResultEvent(true, ""));
                 //异步更新设备 更新USB存储设备
-                UpdateDevice();
+                UpdateDevices();
                 return true;
             }
             else
@@ -184,8 +176,9 @@ namespace WkyApiSharp.Service
 
 
         #region Private 
-        private async Task<int> UpdateDevice()
+        private async Task<bool> UpdateDevices()
         {
+            bool result = false;
             try
             {
                 //获取设备信息
@@ -196,20 +189,16 @@ namespace WkyApiSharp.Service
                     _peerList.Clear();
                     foreach (var item in listPeerResult.Result)
                     {
-                        if (item.ResultClass != null)
+                        if (item.Peer != null)
                         {
-                            _peerList.Add(item.ResultClass);
+                            var peer = new WkyPeer(item.Peer);
+                            _peerList.Add(peer);
+                            await peer.UpdateDiskInfo(this);
                         }
                     }
-
-                    _deviceList.Clear();
-                    foreach (var peer in _peerList)
-                    {
-                        foreach (var device in peer.Devices)
-                        {
-                            _deviceList.Add(device);
-                        }
-                    }
+                    result = true;
+                    _eventReceivedSubject.OnNext(new UpdateDeviceResultEvent() { IsSuccess = true, PeerList = _peerList });
+                    
                 }
                 else
                 {
@@ -218,9 +207,9 @@ namespace WkyApiSharp.Service
             } 
             catch (Exception ex)
             {
-                
+                _eventReceivedSubject.OnNext(new UpdateDeviceResultEvent() { IsSuccess = false });
             }
-            return _deviceList.Count;
+            return result;
         }
         #endregion
 

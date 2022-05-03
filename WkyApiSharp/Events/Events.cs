@@ -15,5 +15,11 @@ namespace WkyApiSharp.Events
         [EnumMember(Value = "LoginResultEvent")]
         LoginResultEvent,
 
+
+        [Description("UpdateDeviceResultEvent")]
+        [EnumMember(Value = "UpdateDeviceResultEvent")]
+        UpdateDeviceResultEvent,
+        
+
     }
 }

@@ -9,17 +9,29 @@ namespace WkyApiSharp.Events
     public enum Events
     {
         /// <summary>
-        /// 登录成功
+        /// 登录成功结果
         /// </summary>
         [Description("LoginResultEvent")]
         [EnumMember(Value = "LoginResultEvent")]
         LoginResultEvent,
 
 
+        /// <summary>
+        /// 设备信息更新结果
+        /// </summary>
         [Description("UpdateDeviceResultEvent")]
         [EnumMember(Value = "UpdateDeviceResultEvent")]
         UpdateDeviceResultEvent,
+
+
+        /// <summary>
+        /// 下载成功
+        /// </summary>
+        [Description("DownloadSuccessEvent")]
+        [EnumMember(Value = "DownloadSuccessEvent")]
+        DownloadSuccessEvent,
         
+
 
     }
 }

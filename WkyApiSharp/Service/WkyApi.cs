@@ -28,6 +28,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using Task = System.Threading.Tasks.Task;
 using WkyApiSharp.Events.Account;
+using System.Threading;
 
 namespace WkyApiSharp.Service
 {
@@ -63,8 +64,6 @@ namespace WkyApiSharp.Service
         public List<WkyPeer> PeerList => _peerList;
 
         private readonly List<WkyPeer> _peerList = new();
-
-
 
 
         //session过期时间
@@ -172,6 +171,10 @@ namespace WkyApiSharp.Service
             }
         }
 
+
+
+
+
         #endregion
 
 
@@ -211,6 +214,88 @@ namespace WkyApiSharp.Service
             }
             return result;
         }
+
+        /// <summary>
+        /// 更新任务列表，获取完设备后开始此方法
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task UpdateTaskFunc(CancellationToken cancellationToken)
+        {
+            //登录到Peer
+            foreach (var peer in _peerList)
+            {
+                //await this.RemoteDownloadLogin(peer.PeerId);
+                await peer.LoginPeer(this);
+            }
+
+            while (true)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Debug.WriteLine("退出Task刷新");
+                    break;
+                }
+                Debug.WriteLine("刷新Task列表");
+                try
+                {
+                    await this.UpdateTask(); 
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+
+                TaskHelper.Sleep(5 * 1000, 100, cancellationToken);
+            }
+        }
+
+        private async Task UpdateTask()
+        {
+            foreach (var peer in _peerList)
+            {
+                var taskList = 
+
+
+                if (peer.IsLogged)
+                {
+                    var result = await this.RemoteDownloadList(peer.PeerId);
+
+                    if (result.Rtn == 0)
+                    {
+                        var obList = result.Tasks.ToList();
+
+
+                        if (obList.Count - _taskList.Count > 0)
+                        {
+                            while (obList.Count - _taskList.Count > 0)
+                            {
+                                TaskList.Add(new TaskModel());
+                            }
+                        }
+                        else if (obList.Count - TaskList.Count < 0)
+                        {
+                            while (obList.Count - TaskList.Count < 0)
+                            {
+                                TaskList.RemoveAt(TaskList.Count - 1);
+                            }
+                        }
+
+                        for (int i = 0; i < obList.Count; i++)
+                        {
+                            TaskList[i].Data = obList[i];
+                        }
+                    }
+
+
+                }
+                //var remoteDownloadListResult = await this.RemoteDownloadList(WkyApiManager.Instance.NowDevice.Peerid);
+
+
+            }
+        }
+
+
         #endregion
 
 
@@ -426,7 +511,7 @@ namespace WkyApiSharp.Service
             }
             return null;
         }
-        
+
 
 
         /// <summary>
@@ -438,7 +523,7 @@ namespace WkyApiSharp.Service
         {
             string data = GetParams(new Dictionary<string, string>()
             {
-                { "pid", peerId },
+                {"pid", peerId },
                 {"appversion", kAppVersion },
                 {"v", "1"},
                 {"ct", "32"},

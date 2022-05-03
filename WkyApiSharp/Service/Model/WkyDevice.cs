@@ -23,6 +23,11 @@ namespace WkyApiSharp.Service.Model
             {
                 _device = value;
             }
+            get 
+            { 
+                return _device; 
+            }
+
         }
 
         /// <summary>

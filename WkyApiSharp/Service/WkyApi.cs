@@ -45,6 +45,7 @@ namespace WkyApiSharp.Service
 
         private string _sessionName = "";
 
+        private CancellationTokenSource _tokenTaskListSource = new CancellationTokenSource();
 
         private WkyLoginDeviceType _wkyLoginDeviceType;
 
@@ -89,6 +90,26 @@ namespace WkyApiSharp.Service
             {
                 UserInfo = JsonConvert.DeserializeObject<WkyApiLoginResultModel>(File.ReadAllText(_sessionName));
             }
+
+            //自身的订阅方法
+            _eventReceivedSubject
+                .OfType<UpdateDeviceResultEvent>()
+                .Subscribe(async r =>
+                {
+                    if (r.IsSuccess)
+                    {
+                        if (_tokenTaskListSource != null)
+                        {
+                            _tokenTaskListSource.Cancel();
+                        }
+                        _tokenTaskListSource = new CancellationTokenSource();
+                        Task.Run(async () =>
+                        {
+                            await UpdateTaskFunc(_tokenTaskListSource.Token);
+                        }, _tokenTaskListSource.Token);
+                    }
+
+                });
         }
 
 
@@ -113,8 +134,19 @@ namespace WkyApiSharp.Service
                         var listPeer = await this.ListPeer(); //检查session是否可用
                         if (listPeer.Rtn == 0)
                         {
-                            isSuccess = true;
-                            break;
+                            //检查是否可登录Peer
+                            var firstPeer = listPeer.Result.FirstOrDefault(a => a.Peer != null);
+                            if (firstPeer.Peer != null)
+                            {
+                                var peer = new WkyPeer(firstPeer.Peer);
+                                var loginPeerResult = await peer.VerifyTaskList(this);
+
+                                if (loginPeerResult)
+                                {
+                                    isSuccess = true;
+                                    break;
+                                }
+                            }
                         }
                         else //失败 API层失败
                         {
@@ -130,6 +162,7 @@ namespace WkyApiSharp.Service
 
             if (!isSuccess)
             {
+                Console.WriteLine("session无效，重新登录");
                 for (int i = 0; i < 3; i++)
                 {
                     try
@@ -138,6 +171,7 @@ namespace WkyApiSharp.Service
                         if (loginResult)
                         {
                             //登录成功，保存session
+                            Console.WriteLine("登录成功，保存session");
                             var sessionContent = this.GetSessionContent();
                             File.WriteAllText(_sessionName, sessionContent);
                             isSuccess = true;
@@ -255,14 +289,18 @@ namespace WkyApiSharp.Service
             foreach (var peer in _peerList)
             {
                 var result = await peer.UpdateTaskList(this);
+
+                if (result.Item1 == true)
+                {
+                    _eventReceivedSubject.OnNext(new UpdateTaskListEvent() { Peer = peer });
+                }
+
                 if (result.Item1 == true && result.Item2 != null && result.Item2.Count > 0)
                 {
                     foreach (var item in result.Item2)
                     {
                         _eventReceivedSubject.OnNext(new DownloadSuccessEvent() { Peer = peer, Task = item });
                     }
-
-                    _eventReceivedSubject.OnNext(new UpdateTaskListEvent() { Peer = peer });
                 }
             }
         }
@@ -377,6 +415,7 @@ namespace WkyApiSharp.Service
                 Debug.WriteLine(resultJson);
                 if (resultRoot.ContainsKey("sMsg") && resultRoot["sMsg"].ToString() == "Success")
                 {
+                    Console.WriteLine("登录成功，更新UserInfo");
                     UserInfo = resultRoot["data"].ToObject<WkyApiLoginResultModel>();
                     UserInfo.CreateDateTime = DateTime.Now;
                     //_eventReceivedSubject.OnNext()

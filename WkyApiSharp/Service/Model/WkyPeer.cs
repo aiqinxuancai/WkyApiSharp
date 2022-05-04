@@ -80,6 +80,12 @@ namespace WkyApiSharp.Service.Model
                         IsLogged = true;
                         return true;
                     }
+                    else if (result.Rtn == 10302)//token 失效？
+                    {
+                        //{"msg":"check session error(-124)","rtn":10302}
+                        IsLogged = true;
+                        return true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +104,25 @@ namespace WkyApiSharp.Service.Model
         }
 
         /// <summary>
+        /// 验证是否可以拉取任务列表，不做其他操作
+        /// </summary>
+        /// <param name="api"></param>
+        /// <returns></returns>
+        public async Task<bool> VerifyTaskList(WkyApi api)
+        {
+            try
+            {
+                var result = await api.RemoteDownloadList(this.PeerId);
+                return result.Rtn == 0;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+
+        /// <summary>
         /// 返回成功失败，和新完成的任务
         /// </summary>
         /// <param name="api"></param>
@@ -106,7 +131,6 @@ namespace WkyApiSharp.Service.Model
         {
             if (IsLogged)
             {
-
                 try
                 {
                     var result = await api.RemoteDownloadList(this.PeerId);
@@ -133,14 +157,20 @@ namespace WkyApiSharp.Service.Model
 
                         foreach (var item in obList)
                         {
-                            var oldItem = _tasks.FirstOrDefault(a => a.Data.Id == item.Id);
+                            var oldItem = _tasks.FirstOrDefault(a => a.Data?.Id == item.Id);
+
 
                             //如果之前的数据是未完成，但是现在是已经完成的，则发送
-                            if (oldItem.Data.State != (int)TaskState.Completed && item.State == (int)TaskState.Completed)
+
+                            if (oldItem != null && oldItem.Data != null)
                             {
-                                var task = new WkyTask() { Data = item };
-                                completedTasks.Add(task);
+                                if (oldItem.Data.State != (int)TaskState.Completed && item.State == (int)TaskState.Completed)
+                                {
+                                    var task = new WkyTask() { Data = item };
+                                    completedTasks.Add(task);
+                                }
                             }
+
                         }
 
                         //重新赋值
@@ -148,8 +178,9 @@ namespace WkyApiSharp.Service.Model
                         {
                             _tasks[i].Data = obList[i];
                         }
+                        return (true, completedTasks);
                     }
-                    return (true, completedTasks);
+                    
                 }
                 catch (Exception ex)
                 {

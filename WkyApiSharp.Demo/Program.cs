@@ -39,10 +39,20 @@ namespace WkyApiSharp.Demo // Note: actual namespace depends on the project name
                     Console.WriteLine("下载完成");
                 });
 
+            wkyApi.EventReceived
+                .OfType<UpdateTaskListEvent>()
+                .Subscribe(async r =>
+                {
+                    Console.WriteLine("任务列表更新");
+                });
+
             var result = wkyApi.StartLogin().Result;
             if (result)
             {
                 //DeviceTest(wkyApi);
+      
+
+
             }
 
             Console.ReadLine();

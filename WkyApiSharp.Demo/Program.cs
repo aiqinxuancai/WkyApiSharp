@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Graph;
+using System;
 using System.Reactive.Linq;
 using WkyApiSharp.Events.Account;
 using WkyApiSharp.Service;

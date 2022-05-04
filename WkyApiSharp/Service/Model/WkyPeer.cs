@@ -97,40 +97,68 @@ namespace WkyApiSharp.Service.Model
             }
         }
 
-        public async Task UpdateTaskList(WkyApi api)
+        /// <summary>
+        /// 返回成功失败，和新完成的任务
+        /// </summary>
+        /// <param name="api"></param>
+        /// <returns></returns>
+        public async Task<(bool, List<WkyTask>)> UpdateTaskList(WkyApi api)
         {
             if (IsLogged)
             {
-                var result = await api.RemoteDownloadList(this.PeerId);
 
-                if (result.Rtn == 0)
+                try
                 {
-                    var remoteTaskList = result.Tasks.ToList();
+                    var result = await api.RemoteDownloadList(this.PeerId);
+                    List<WkyTask> completedTasks = new List<WkyTask>();
+                    if (result.Rtn == 0)
+                    {
+                        var obList = result.Tasks.ToList();
 
-                    //TODO 更新，推送下载成功等事件
+                        //创建对应数量的WkyTask
+                        if (obList.Count - _tasks.Count > 0)
+                        {
+                            while (obList.Count - _tasks.Count > 0)
+                            {
+                                _tasks.Add(new WkyTask());
+                            }
+                        }
+                        else if (obList.Count - _tasks.Count < 0)
+                        {
+                            while (obList.Count - _tasks.Count < 0)
+                            {
+                                _tasks.RemoveAt(_tasks.Count - 1);
+                            }
+                        }
 
+                        foreach (var item in obList)
+                        {
+                            var oldItem = _tasks.FirstOrDefault(a => a.Data.Id == item.Id);
 
-                    //if (obList.Count - _taskList.Count > 0)
-                    //{
-                    //    while (obList.Count - _taskList.Count > 0)
-                    //    {
-                    //        TaskList.Add(new TaskModel());
-                    //    }
-                    //}
-                    //else if (obList.Count - TaskList.Count < 0)
-                    //{
-                    //    while (obList.Count - TaskList.Count < 0)
-                    //    {
-                    //        TaskList.RemoveAt(TaskList.Count - 1);
-                    //    }
-                    //}
+                            //如果之前的数据是未完成，但是现在是已经完成的，则发送
+                            if (oldItem.Data.State != (int)TaskState.Completed && item.State == (int)TaskState.Completed)
+                            {
+                                var task = new WkyTask() { Data = item };
+                                completedTasks.Add(task);
+                            }
+                        }
 
-                    //for (int i = 0; i < obList.Count; i++)
-                    //{
-                    //    TaskList[i].Data = obList[i];
-                    //}
+                        //重新赋值
+                        for (int i = 0; i < obList.Count; i++)
+                        {
+                            _tasks[i].Data = obList[i];
+                        }
+                    }
+                    return (true, completedTasks);
                 }
+                catch (Exception ex)
+                {
+
+                }
+
+                
             }
+            return (false, null);
         }
 
     }

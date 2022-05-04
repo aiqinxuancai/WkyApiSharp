@@ -30,7 +30,17 @@ namespace WkyApiSharp.Events
         [Description("DownloadSuccessEvent")]
         [EnumMember(Value = "DownloadSuccessEvent")]
         DownloadSuccessEvent,
+
+
+        /// <summary>
+        /// 任务列表更新
+        /// </summary>
+        [Description("UpdateTaskListEvent")]
+        [EnumMember(Value = "UpdateTaskListEvent")]
+        UpdateTaskListEvent,
+
         
+
 
 
     }

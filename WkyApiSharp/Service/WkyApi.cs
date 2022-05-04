@@ -254,55 +254,16 @@ namespace WkyApiSharp.Service
         {
             foreach (var peer in _peerList)
             {
-                //当前的任务表
-                var taskList = peer.Tasks;
-
-
-                if (peer.IsLogged)
+                var result = await peer.UpdateTaskList(this);
+                if (result.Item1 == true && result.Item2 != null && result.Item2.Count > 0)
                 {
-                    var result = await this.RemoteDownloadList(peer.PeerId);
-
-                    if (result.Rtn == 0)
+                    foreach (var item in result.Item2)
                     {
-                        var obList = result.Tasks.ToList();
-
-                        //创建对应数量的WkyTask
-                        if (obList.Count - taskList.Count > 0)
-                        {
-                            while (obList.Count - taskList.Count > 0)
-                            {
-                                taskList.Add(new WkyTask());
-                            }
-                        }
-                        else if (obList.Count - taskList.Count < 0)
-                        {
-                            while (obList.Count - taskList.Count < 0)
-                            {
-                                taskList.RemoveAt(taskList.Count - 1);
-                            }
-                        }
-                        foreach (var item in obList)
-                        {
-                            var oldItem = taskList.FirstOrDefault(a => a.Data.Id == item.Id);
-
-                            //如果之前的数据是未完成，但是现在是已经完成的，则发送
-                            if (oldItem.Data.State != (int)TaskState.Completed && item.State == (int)TaskState.Completed)
-                            {
-                                var task = new WkyTask() { Data = item };
-                                _eventReceivedSubject.OnNext(new DownloadSuccessEvent() { Peer = peer, Task = task });
-                            }
-                        }
-                        
-                        //重新赋值
-                        for (int i = 0; i < obList.Count; i++)
-                        {
-                            taskList[i].Data = obList[i];
-                        }
+                        _eventReceivedSubject.OnNext(new DownloadSuccessEvent() { Peer = peer, Task = item });
                     }
+
+                    _eventReceivedSubject.OnNext(new UpdateTaskListEvent() { Peer = peer });
                 }
-                //var remoteDownloadListResult = await this.RemoteDownloadList(WkyApiManager.Instance.NowDevice.Peerid);
-
-
             }
         }
 

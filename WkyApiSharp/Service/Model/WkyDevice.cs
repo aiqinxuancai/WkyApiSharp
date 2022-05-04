@@ -52,7 +52,11 @@ namespace WkyApiSharp.Service.Model
                         Partitions.Clear();
                         foreach (var disk in diskInfo.Result)
                         {
-                            Partitions.AddRange(disk.ResultClass.Partitions);
+                            if (disk.ResultClass != null)
+                            {
+                                Partitions.AddRange(disk.ResultClass.Partitions);
+                            }
+                            
                         }
                         break;
                     }

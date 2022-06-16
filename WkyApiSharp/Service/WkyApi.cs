@@ -376,6 +376,11 @@ namespace WkyApiSharp.Service
             {
                 args["phone_area"] = "Email";
                 args["account_type"] = "5";
+                args["mail"] = _user;
+            }
+            else
+            {
+                args["phone"] = _user;
             }
 
             if (_wkyLoginDeviceType == WkyLoginDeviceType.Mobile)
@@ -389,7 +394,7 @@ namespace WkyApiSharp.Service
                 args["product_id"] = "0";
             }
 
-            args["phone"] = _user;
+            
             args["pwd"] = GetPassword(_password);
 
             loginData = GenerateBody(args);

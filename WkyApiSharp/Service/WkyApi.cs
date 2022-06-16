@@ -309,6 +309,53 @@ namespace WkyApiSharp.Service
         #endregion
 
 
+        #region Public 
+
+        public async Task<WkyApiGetUsbInfoResultModel> GetUsbInfoWithId(string deviceId)
+        {
+            try
+            {
+                //获取设备信息
+                var model = await this.GetUsbInfo(deviceId);
+                _eventReceivedSubject.OnNext(new UpdateUsbInfoEvent() { IsSuccess = true, model = model });
+                return model;
+            }
+            catch (Exception ex)
+            {
+                _eventReceivedSubject.OnNext(new UpdateUsbInfoEvent() { IsSuccess = false });
+            }
+            return null;
+        }
+
+        public WkyDevice GetDeviceWithId(string deviceId)
+        {
+            if (_peerList != null && _peerList.Count > 0)
+            {
+                foreach (var peer in _peerList)
+                {
+                    foreach (var device in peer.Devices)
+                    {
+                        if (!string.IsNullOrWhiteSpace(deviceId))
+                        {
+                            if (device.Device.DeviceId == deviceId)
+                            {
+                                //await UpdateUsbInfo(device.Device.DeviceId);
+                                return device;
+                            }
+                        }
+                        else
+                        {
+                            //返回默认
+                            return device;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        #endregion
+
         #region BaseHelper
 
         /// <summary>

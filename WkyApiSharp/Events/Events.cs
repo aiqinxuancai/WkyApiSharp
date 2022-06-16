@@ -39,7 +39,13 @@ namespace WkyApiSharp.Events
         [EnumMember(Value = "UpdateTaskListEvent")]
         UpdateTaskListEvent,
 
-        
+
+        /// <summary>
+        /// UpdateUsbInfo
+        /// </summary>
+        [Description("UpdateUsbInfoEvent")]
+        [EnumMember(Value = "UpdateUsbInfoEvent")]
+        UpdateUsbInfoEvent,
 
 
 

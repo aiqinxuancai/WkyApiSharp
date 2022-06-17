@@ -68,7 +68,7 @@ namespace WkyApiSharp.Service
 
 
         //session过期时间
-        const int kCookieMaxAge = 604800; 
+        const int kCookieMaxAge = 604800;
 
 
 
@@ -117,7 +117,7 @@ namespace WkyApiSharp.Service
         #region Public
 
         /// <summary>
-        /// 登录的原生
+        /// 登录，优先使用session，如果不可用，则使用账号密码
         /// </summary>
         /// <returns></returns>
         public async Task<bool> StartLogin()
@@ -152,7 +152,7 @@ namespace WkyApiSharp.Service
                         {
                             await Task.Delay(1000);
                         }
-                    } 
+                    }
                     catch (Exception ex) //失败
                     {
                         await Task.Delay(1000);
@@ -162,7 +162,7 @@ namespace WkyApiSharp.Service
 
             if (!isSuccess)
             {
-                Console.WriteLine("session无效，重新登录");
+                Console.WriteLine("session无效，使用密码重新登录");
                 for (int i = 0; i < 3; i++)
                 {
                     try
@@ -177,7 +177,7 @@ namespace WkyApiSharp.Service
                             isSuccess = true;
                             break;
                         }
-                    } 
+                    }
                     catch (WkyApiException ex)
                     {
                         errorMessage = ex.Message;
@@ -235,19 +235,21 @@ namespace WkyApiSharp.Service
                     }
                     result = true;
                     _eventReceivedSubject.OnNext(new UpdateDeviceResultEvent() { IsSuccess = true, PeerList = _peerList });
-                    
+
                 }
                 else
                 {
                     throw new WkyApiException("获取Peer失败");
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 _eventReceivedSubject.OnNext(new UpdateDeviceResultEvent() { IsSuccess = false });
             }
             return result;
         }
+
+
 
         /// <summary>
         /// TODO 更新任务列表，获取完设备后开始此方法
@@ -273,7 +275,7 @@ namespace WkyApiSharp.Service
                 Debug.WriteLine("刷新Task列表");
                 try
                 {
-                    await this.UpdateTask(); 
+                    await this.UpdateTask();
                 }
                 catch (Exception ex)
                 {
@@ -305,27 +307,21 @@ namespace WkyApiSharp.Service
             }
         }
 
+        public async Task LoginAllPeer()
+        {
+            //登录到Peer
+            foreach (var peer in _peerList)
+            {
+                //await this.RemoteDownloadLogin(peer.PeerId);
+                await peer.LoginPeer(this);
+            }
+        }
+
 
         #endregion
 
 
-        #region Public 
-
-        public async Task<WkyApiGetUsbInfoResultModel> GetUsbInfoWithId(string deviceId)
-        {
-            try
-            {
-                //获取设备信息
-                var model = await this.GetUsbInfo(deviceId);
-                _eventReceivedSubject.OnNext(new UpdateUsbInfoEvent() { IsSuccess = true, model = model });
-                return model;
-            }
-            catch (Exception ex)
-            {
-                _eventReceivedSubject.OnNext(new UpdateUsbInfoEvent() { IsSuccess = false });
-            }
-            return null;
-        }
+        #region Public Get
 
         public WkyDevice GetDeviceWithId(string deviceId)
         {
@@ -352,6 +348,25 @@ namespace WkyApiSharp.Service
                 }
             }
             return null;
+        }
+
+        public List<WkyDevice> GetAllDevice()
+        {
+            List<WkyDevice> devices = new List<WkyDevice>();
+            if (_peerList != null && _peerList.Count > 0)
+            {
+                foreach (var peer in _peerList)
+                {
+                    foreach (var device in peer.Devices)
+                    {
+                        if (device != null && !string.IsNullOrEmpty(device.Device.DeviceId))
+                        {
+                            devices.Add(device);
+                        }
+                    }
+                }
+            }
+            return devices;
         }
 
         #endregion
@@ -391,7 +406,7 @@ namespace WkyApiSharp.Service
 
         private IFlurlRequest BaseHeaderAndCookie(string url)
         {
-            
+
             return BaseHeader(url)
                 //.WithHeader("user-agent", $"MineCrafter3/{kAppVersion} (iPhone; iOS 15.0.1; Scale/3.00)")
                 //.WithHeader("cache-control", $"no-cache")
@@ -441,7 +456,7 @@ namespace WkyApiSharp.Service
                 args["product_id"] = "0";
             }
 
-            
+
             args["pwd"] = GetPassword(_password);
 
             loginData = GenerateBody(args);
@@ -488,13 +503,13 @@ namespace WkyApiSharp.Service
         }
 
 
-        
+
 
         /// <summary>
         /// 获取玩客云设备列表
         /// </summary>
         /// <returns></returns>
-        public async Task<WkyApiListPeerResultModel> ListPeer() 
+        public async Task<WkyApiListPeerResultModel> ListPeer()
         {
             ///listPeer?appversion=1.4.5.112&ct=5&v=8&sign=b806ff46fde38c3da6b0be10e86ebd4c
             string data = GetParams(new Dictionary<string, string>()
@@ -746,7 +761,7 @@ namespace WkyApiSharp.Service
             WkyApiCreateTaskModel sendModel = new WkyApiCreateTaskModel();
             Model.CreateTask.Task task = new Model.CreateTask.Task();
             task.Filesize = urlModel.TaskInfo.Size;
-            task.Infohash = urlModel.Infohash ;
+            task.Infohash = urlModel.Infohash;
             task.Name = urlModel.TaskInfo.Name;
             task.Url = urlModel.TaskInfo.Url;
             if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
@@ -807,7 +822,7 @@ namespace WkyApiSharp.Service
 
             sendModel.Path = path;
             sendModel.Tasks = tasks.ToArray();
-            Debug.WriteLine("sendJson:"  + sendModel.ToJson());
+            Debug.WriteLine("sendJson:" + sendModel.ToJson());
             var result = await BaseHeaderAndCookie(kCreateTaskUrl + $"?{DictionaryToParamsString(data)}")
                 .PostJsonAsync(sendModel);
 
@@ -857,7 +872,7 @@ namespace WkyApiSharp.Service
             if (subTask == null)
             {
                 List<long> taskIds = new List<long>();
-                foreach(var sub in urlModel.TaskInfo.SubList)
+                foreach (var sub in urlModel.TaskInfo.SubList)
                 {
                     taskIds.Add(sub.Id);
                 }

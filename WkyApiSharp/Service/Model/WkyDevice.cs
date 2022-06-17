@@ -28,6 +28,31 @@ namespace WkyApiSharp.Service.Model
 
         }
 
+        public string PeerId
+        {
+            get
+            {
+                if (_device != null)
+                {
+                    return _device.Peerid;
+                }
+                return "";
+            }
+
+        }
+
+        public string DeviceId
+        {
+            get
+            {
+                if (_device != null)
+                {
+                    return _device.DeviceId;
+                }
+                return "";
+            }
+
+        }
         /// <summary>
         /// 磁盘对应的分区
         /// </summary>

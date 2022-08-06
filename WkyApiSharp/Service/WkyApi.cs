@@ -180,7 +180,7 @@ namespace WkyApiSharp.Service
                     }
                     catch (WkyApiException ex)
                     {
-                        errorMessage = ex.Message;
+                        errorMessage = ex.Message; //由Login登录接口抛出异常
                         break;
                     }
                     catch (Exception ex)
@@ -490,10 +490,26 @@ namespace WkyApiSharp.Service
                 }
                 else
                 {
-                    if (resultRoot.ContainsKey("sMsg"))
+                    //{"sMsg":"Parameter error","iRet":-100} //参数错误
+                    if (resultRoot.ContainsKey("iRet"))
+                    {
+                        int iRet = resultRoot["iRet"].ToObject<int>();
+                        var msg = iRet switch
+                        {
+                            -100 => "参数错误",
+                            -129 => "账号或密码不正确",
+                            _ => resultRoot.ContainsKey("sMsg") ? resultRoot["sMsg"].ToString() : "未知错误"
+                        };
+
+                        throw new WkyApiException(msg);
+
+                    }
+                    else if (resultRoot.ContainsKey("sMsg"))
                     {
                         throw new WkyApiException(resultRoot["sMsg"].ToString());
                     }
+
+
                 }
             }
 

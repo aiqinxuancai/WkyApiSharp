@@ -40,6 +40,8 @@ namespace WkyApiSharp.Service
 
     public class WkyApi : WkyApiBase
     {
+        public string User => _user; //可能是手机号也可能是邮箱
+
         private string _user = ""; //可能是手机号也可能是邮箱
         private string _password = "";
 

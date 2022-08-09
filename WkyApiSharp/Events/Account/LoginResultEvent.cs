@@ -12,7 +12,10 @@ namespace WkyApiSharp.Events.Account
         public string ErrorMessage { get; set; }
 
 
-        public LoginResultEvent(bool isSuccess, string errorMessage) => (IsSuccess, ErrorMessage) = (isSuccess, errorMessage);
+        public string Account { get; set; }
+
+
+        public LoginResultEvent(bool isSuccess, string account, string errorMessage) => (IsSuccess, Account, ErrorMessage) = (isSuccess, account, errorMessage);
 
         /// <summary>
         /// 事件类型

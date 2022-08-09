@@ -195,14 +195,14 @@ namespace WkyApiSharp.Service
 
             if (isSuccess)
             {
-                _eventReceivedSubject.OnNext(new LoginResultEvent(true, ""));
+                _eventReceivedSubject.OnNext(new LoginResultEvent(true, User, ""));
                 //异步更新设备 更新USB存储设备
                 UpdateDevices();
                 return true;
             }
             else
             {
-                _eventReceivedSubject.OnNext(new LoginResultEvent(false, errorMessage));
+                _eventReceivedSubject.OnNext(new LoginResultEvent(false, User, errorMessage));
                 return false;
             }
         }

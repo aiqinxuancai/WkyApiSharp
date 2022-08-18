@@ -68,6 +68,8 @@ namespace WkyApiSharp.Service
 
         private readonly List<WkyPeer> _peerList = new();
 
+        private SemaphoreSlim _lockUpdateList = new(1);
+
 
         //session过期时间
         const int kCookieMaxAge = 604800;
@@ -288,25 +290,39 @@ namespace WkyApiSharp.Service
             }
         }
 
-        private async Task UpdateTask()
+        /// <summary>
+        /// 执行一次任务刷新，并会通知到客户端
+        /// </summary>
+        /// <returns></returns>
+        public async Task UpdateTask()
         {
-            foreach (var peer in _peerList)
+            await _lockUpdateList.WaitAsync();
+
+            try 
             {
-                var result = await peer.UpdateTaskList(this);
-
-                if (result.Item1 == true)
+                foreach (var peer in _peerList)
                 {
-                    _eventReceivedSubject.OnNext(new UpdateTaskListEvent() { Peer = peer });
-                }
+                    var result = await peer.UpdateTaskList(this);
 
-                if (result.Item1 == true && result.Item2 != null && result.Item2.Count > 0)
-                {
-                    foreach (var item in result.Item2)
+                    if (result.Item1 == true)
                     {
-                        _eventReceivedSubject.OnNext(new DownloadSuccessEvent() { Peer = peer, Task = item });
+                        _eventReceivedSubject.OnNext(new UpdateTaskListEvent() { Peer = peer });
+                    }
+
+                    if (result.Item1 == true && result.Item2 != null && result.Item2.Count > 0)
+                    {
+                        foreach (var item in result.Item2)
+                        {
+                            _eventReceivedSubject.OnNext(new DownloadSuccessEvent() { Peer = peer, Task = item });
+                        }
                     }
                 }
             }
+            finally
+            {
+                _lockUpdateList.Release();
+            }
+
         }
 
         public async Task LoginAllPeer()

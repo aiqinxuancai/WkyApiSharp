@@ -107,6 +107,12 @@ namespace WkyApiSharp.Service.Model.RemoteDownloadList
 
         [JsonProperty("type")]
         public long Type { get; set; }
+
+
+        public string GetOperationCode()
+        {
+            return $"{Id}_{State}_{Type}";
+        }
     }
 
     public partial class DcdnChannel

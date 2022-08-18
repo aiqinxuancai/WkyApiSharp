@@ -653,7 +653,7 @@ namespace WkyApiSharp.Service
                 { "number", count.ToString() },
                 { "appversion", kAppVersion },
                 { "type", "4" },
-                { "needUrl", "0" },
+                { "needUrl", "1" },
                 { "v", "2"},
                 { "ct", "31"},
             }, UserInfo.SessionId);

@@ -38,7 +38,7 @@ namespace WkyApiSharp.Service
         PC = 1, // 传递 peerId（MD5的长度） + product_id=0 本地固定，来源随机？
     }
 
-    public class WkyApi : WkyApiBase
+    public partial class WkyApi : WkyApiBase
     {
         public string User => _user; //可能是手机号也可能是邮箱
 
@@ -74,7 +74,10 @@ namespace WkyApiSharp.Service
         //session过期时间
         const int kCookieMaxAge = 604800;
 
-
+        public WkyApi()
+        {
+           
+        }
 
         /// <summary>
         /// 从用户名密码初始化
@@ -82,6 +85,17 @@ namespace WkyApiSharp.Service
         /// <param name="user"></param>
         /// <param name="password"></param>
         public WkyApi(string user, string password, WkyLoginDeviceType wkyLoginDeviceType = WkyLoginDeviceType.Mobile)
+        {
+            Init(user, password, wkyLoginDeviceType);
+        }
+
+        /// <summary>
+        /// 允许再次初始化API
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <param name="wkyLoginDeviceType"></param>
+        public void Init(string user, string password, WkyLoginDeviceType wkyLoginDeviceType = WkyLoginDeviceType.Mobile)
         {
             _user = user;
             _password = password;
@@ -94,27 +108,9 @@ namespace WkyApiSharp.Service
             {
                 UserInfo = JsonConvert.DeserializeObject<WkyApiLoginResultModel>(File.ReadAllText(_sessionName));
             }
-
-            //自身的订阅方法
-            _eventReceivedSubject
-                .OfType<UpdateDeviceResultEvent>()
-                .Subscribe(async r =>
-                {
-                    if (r.IsSuccess)
-                    {
-                        if (_tokenTaskListSource != null)
-                        {
-                            _tokenTaskListSource.Cancel();
-                        }
-                        _tokenTaskListSource = new CancellationTokenSource();
-                        Task.Run(async () =>
-                        {
-                            await UpdateTaskFunc(_tokenTaskListSource.Token);
-                        }, _tokenTaskListSource.Token);
-                    }
-
-                });
+            _peerList.Clear();
         }
+
 
 
 
@@ -217,6 +213,21 @@ namespace WkyApiSharp.Service
 
 
         #region Private 
+
+        private async Task OnUpdateDeviceSuccess()
+        {
+            if (_tokenTaskListSource != null)
+            {
+                _tokenTaskListSource.Cancel();
+            }
+            _tokenTaskListSource = new CancellationTokenSource();
+            Task.Run(async () =>
+            {
+                await UpdateTaskFunc(_tokenTaskListSource.Token);
+            }, _tokenTaskListSource.Token);
+
+        }
+
         private async Task<bool> UpdateDevices()
         {
             bool result = false;
@@ -238,6 +249,7 @@ namespace WkyApiSharp.Service
                         }
                     }
                     result = true;
+                    OnUpdateDeviceSuccess();
                     _eventReceivedSubject.OnNext(new UpdateDeviceResultEvent() { IsSuccess = true, PeerList = _peerList });
 
                 }

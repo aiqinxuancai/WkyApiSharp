@@ -56,7 +56,7 @@ namespace WkyApiSharp.Service.Model
         /// <summary>
         /// 磁盘对应的分区
         /// </summary>
-        public List<GetUsbInfo.Partition> Partitions { get; set; } = new List<GetUsbInfo.Partition>();
+        public List<WkyPartition> Partitions { get; set; } = new List<WkyPartition>();
 
 
 
@@ -79,7 +79,11 @@ namespace WkyApiSharp.Service.Model
                         {
                             if (disk.ResultClass != null)
                             {
-                                Partitions.AddRange(disk.ResultClass.Partitions);
+                                foreach (var partition in disk.ResultClass.Partitions)
+                                {
+
+                                    Partitions.Add(new WkyPartition(partition));
+                                }
                             }
                             
                         }

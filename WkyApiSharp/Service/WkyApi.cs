@@ -361,19 +361,23 @@ namespace WkyApiSharp.Service
                 {
                     foreach (var device in peer.Devices)
                     {
-                        if (!string.IsNullOrWhiteSpace(deviceId))
+                        if (device.Device.CoturnOnline == 1) //设备在线
                         {
-                            if (device.Device.DeviceId == deviceId)
+                            if (!string.IsNullOrWhiteSpace(deviceId))
                             {
-                                //await UpdateUsbInfo(device.Device.DeviceId);
+                                if (device.Device.DeviceId == deviceId)
+                                {
+                                    //await UpdateUsbInfo(device.Device.DeviceId);
+                                    return device;
+                                }
+                            }
+                            else
+                            {
+                                //返回默认
                                 return device;
                             }
                         }
-                        else
-                        {
-                            //返回默认
-                            return device;
-                        }
+
                     }
                 }
             }

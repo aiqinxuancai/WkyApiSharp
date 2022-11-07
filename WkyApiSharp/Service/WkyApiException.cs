@@ -9,5 +9,7 @@ namespace WkyApiSharp.Service
         public WkyApiException(string message) : base(message)
         {
         }
+
+
     }
 }

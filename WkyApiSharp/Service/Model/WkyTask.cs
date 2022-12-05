@@ -11,6 +11,7 @@ namespace WkyApiSharp.Service.Model
         Waiting = 8,//8 => "等待中",
         Pause = 9,//9 => "已暂停",
         Completed = 11, //11 => "已完成",
+        LackResources = 12, //12 => "缺少资源",
         PreparingAdd//14 => "准备添加中",
     }
 

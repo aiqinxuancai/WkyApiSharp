@@ -12,7 +12,8 @@ namespace WkyApiSharp.Service.Model
         Pause = 9,//9 => "已暂停",
         Completed = 11, //11 => "已完成",
         LackResources = 12, //12 => "缺少资源",
-        PreparingAdd//14 => "准备添加中",
+        PreparingAdd = 14, //14 => "准备添加中",
+        DiskError = 38 //38 => 磁盘写入异常
     }
 
     public record WkyTask

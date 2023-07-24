@@ -797,7 +797,7 @@ namespace WkyApiSharp.Service
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
         /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
-        public async Task<WkyApiCreateTaskResultModel> CreateTaskWithUrlResolve(string peerId, string path, WkyApiUrlResolveResultModel urlModel)
+        public async Task<WkyApiCreateTaskResultModel> CreateTaskWithUrlResolve(string peerId, string path, WkyApiUrlResolveResultModel urlModel, string taskName = "")
         {
             var data = new Dictionary<string, string>()
             {
@@ -812,7 +812,7 @@ namespace WkyApiSharp.Service
             Model.CreateTask.Task task = new Model.CreateTask.Task();
             task.Filesize = urlModel.TaskInfo.Size;
             task.Infohash = urlModel.Infohash;
-            task.Name = urlModel.TaskInfo.Name;
+            task.Name = string.IsNullOrWhiteSpace(taskName) ? urlModel.TaskInfo.Name : taskName;
             task.Url = urlModel.TaskInfo.Url;
             if (!string.IsNullOrWhiteSpace(urlModel.Infohash) && string.IsNullOrWhiteSpace(task.Url))
             {
@@ -845,7 +845,7 @@ namespace WkyApiSharp.Service
         /// <param name="path"></param>
         /// <param name="urlModel"></param>
         /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
-        public async Task<WkyApiCreateTaskResultModel> CreateTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel)
+        public async Task<WkyApiCreateTaskResultModel> CreateTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel, string taskName = "")
         {
             var data = new Dictionary<string, string>()
             {
@@ -860,7 +860,7 @@ namespace WkyApiSharp.Service
             Model.CreateTask.Task task = new Model.CreateTask.Task();
             task.Filesize = long.Parse(urlModel.TaskInfo.Size);
             task.Infohash = urlModel.Infohash;
-            task.Name = urlModel.TaskInfo.Name;
+            task.Name = string.IsNullOrWhiteSpace(taskName) ? urlModel.TaskInfo.Name : taskName;
             task.Url = urlModel.TaskInfo.Url;
             if (!string.IsNullOrWhiteSpace(task.Infohash) && string.IsNullOrWhiteSpace(task.Url))
             {
@@ -896,7 +896,11 @@ namespace WkyApiSharp.Service
         /// <param name="urlModel"></param>
         /// <param name="subTask">如BT内的子文件ID，从解析后的任务中获取，为null则全部下载</param>
         /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
-        public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithUrlResolve(string peerId, string path, WkyApiUrlResolveResultModel urlModel, List<long> subTask)
+        public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithUrlResolve(string peerId, 
+                                                                                            string path, 
+                                                                                            WkyApiUrlResolveResultModel urlModel, 
+                                                                                            List<long> subTask, 
+                                                                                            string taskName = "")
         {
             var data = new Dictionary<string, string>()
             {
@@ -910,7 +914,7 @@ namespace WkyApiSharp.Service
             WkyApiCreateBatchTaskModel sendModel = new WkyApiCreateBatchTaskModel();
             Model.CreateBatchTask.Task task = new Model.CreateBatchTask.Task();
             task.Filesize = urlModel.TaskInfo.Size;
-            task.Name = urlModel.TaskInfo.Name;
+            task.Name = string.IsNullOrWhiteSpace(taskName) ? urlModel.TaskInfo.Name : taskName;
             task.Url = urlModel.TaskInfo.Url;
             task.Type = urlModel.TaskInfo.Type;
 
@@ -966,7 +970,7 @@ namespace WkyApiSharp.Service
         /// <param name="urlModel"></param>
         /// <param name="subTask">如BT内的子文件ID，从解析后的任务中获取</param>
         /// <returns>有可能返回Task中存在result!=0，是重复添加等错误的返回</returns>
-        public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel, List<long> subTask)
+        public async Task<WkyApiCreateBatchTaskResultModel> CreateBatchTaskWithBtCheck(string peerId, string path, WkyApiBtCheckResultModel urlModel, List<long> subTask, string taskName = "")
         {
             var data = new Dictionary<string, string>()
             {
@@ -980,7 +984,7 @@ namespace WkyApiSharp.Service
             WkyApiCreateBatchTaskModel sendModel = new WkyApiCreateBatchTaskModel();
             Model.CreateBatchTask.Task task = new Model.CreateBatchTask.Task();
             task.Filesize = long.Parse(urlModel.TaskInfo.Size);
-            task.Name = urlModel.TaskInfo.Name;
+            task.Name = string.IsNullOrWhiteSpace(taskName) ? urlModel.TaskInfo.Name : taskName;
             task.Url = urlModel.TaskInfo.Url;
             task.Type = urlModel.TaskInfo.Type;
 
